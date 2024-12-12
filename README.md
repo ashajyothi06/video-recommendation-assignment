@@ -1,139 +1,64 @@
+# Video Recommendation System
+## Preprocessing of Data
+1.	Cleaned the data in excel to fit the data structure of the columns defined in the CSV
+2.	Used pandas library to read the data from csv file converting the datatype from object to the corresponding data types and then make a data frame for each of the files.
+3.	Merge the data from different dataframes to form the training dataset by joining them on the common Column ID
+4.	Drop the duplicate values from the dataset
+5.	Replace the categorical data like language into numerical form
+6.	Transform the dataset into a normalized version
+7.	Drop the features which may cause any imbalance, for example ‘Type’ in lecture had majority of Lectures as compared to Events or Debates etc.
+8.	K-fold sampling is used to sample the data
+9.	And, cross validation was used to split the given data into test and train sets
 
-# 🎥 Video Recommendation Algorithm Assignment
-To see what kind of motivational content you have to recommend, take reference from our Empowerverse App [ANDROID](https://play.google.com/store/apps/details?id=com.empowerverse.app) || [iOS](https://apps.apple.com/us/app/empowerverse/id6449552284).
+## Models Used:
+•	Coding Language:Python
+•	Library and Packages used while coding
+i.	Numpy 
+ii.	Pandas
+iii.SKlearn
+iv.	Math
+v.	Matplotlib
+vi.	scipy.spatial
+vii.scipy.stats
 
-## 🎯 Objective
+•	Recommendation Systems do not impose a binary question of classifying a video to fall into one category or another also we do not have labeled information in the given dataset of any type thus this prediction system requires Unsupervised learning.
+•	The system demands a certain number of similar outputs produced using the known data about the item popularity or similarity with others.
+## The Models used to identify similar products were:
+1.	K-Means Clustering to identify the cluster from where the closest points can be identified.
+To understand the data points better, this approach was chosen. The challenge was to figure out K. To identify K , Elbow method was used and from the curve the best K value was seen as 2.
+ 
 
-Design a recommendation algorithm that suggests videos based on user preferences and engagement patterns. The algorithm will deliver personalized video recommendations by leveraging user interaction data and video metadata obtained via provided APIs.
+Tried K Values:K=5 and K=2
+Before plotting the data was made more suited for it using the Principal Component Analysis, which is used to reduce dimensionality of the dataset. 
+For K=2 the separation was more clear
+ 
+2.	K-Nearest Neighbors:
+a.	Although KNN is mostly used to classify the unseen data to the class most of the labelled instances belongs in the training dataset, I have implemented this for this dataset in a different way. Instead of using the predict attribute which defines the class label of the unseen data. I utilized the attribute to get the 30- nearest neighbors found for the unseen dataset. 
+b.	The data found was later transformed into the Lecture ID in the Recommendation Array of 30 Videos for each instance in the test data set.
+c.	Distance Matrix Used in the model: Euclidian distance
+ 
+3.	Hybrid approach incorporating Correlation Matrix (using Linear Regression)
+In this approach, I produced a co-relation matrix utilizing every Lecture ID x Lecture ID Matrix.
+On the basis of features like Language, category, author ID a correlation matrix was generated using PearsonR distance Metric
 
-## 📊 Dataset
+## Pearson’s correlation:
 
-The dataset can be fetched using the following APIs, which provide information on user interactions and video metadata: 
-Make sure using using pagination to fetch data and managing the data fetching method in a way that it's not fetching same data again and again.
-
-### APIs
-
-1. **Get All Viewed Posts** (METHOD: GET):
-   ```
-   https://api.socialverseapp.com/posts/view?page=1&page_size=1000&resonance_algorithm=resonance_algorithm_cjsvervb7dbhss8bdrj89s44jfjdbsjd0xnjkbvuire8zcjwerui3njfbvsujc5if
-   ```
-
-2. **Get All Liked Posts** (METHOD: GET):
-   ```
-   https://api.socialverseapp.com/posts/like?page=1&page_size=1000&resonance_algorithm=resonance_algorithm_cjsvervb7dbhss8bdrj89s44jfjdbsjd0xnjkbvuire8zcjwerui3njfbvsujc5if
-   ```
-
-3. **Get All Inspired posts** (METHOD: GET):
-   ```
-   https://api.socialverseapp.com/posts/inspire?page=1&page_size=1000&resonance_algorithm=resonance_algorithm_cjsvervb7dbhss8bdrj89s44jfjdbsjd0xnjkbvuire8zcjwerui3njfbvsujc5if
-   ```
+Pearson's correlation coefficient when applied to a population is referred as the population correlation coefficient or the population Pearson correlation coefficient. The formula for Pearson’s R is:
 
 
-4. **Get All Rated posts** (METHOD: GET):
-   ```
-   https://api.socialverseapp.com/posts/rating?page=1&page_size=1000&resonance_algorithm=resonance_algorithm_cjsvervb7dbhss8bdrj89s44jfjdbsjd0xnjkbvuire8zcjwerui3njfbvsujc5if
-   ```
+The list was then sorted in an ascending order to get the closest points on the top and then 30 top most videos were chosen and saved in the recommendation Rank Matrix
 
-5. **Get All Posts** (Header required*) (METHOD: GET):
-   ```
-   https://api.socialverseapp.com/posts/summary/get?page=1&page_size=1000
-   ```
+## Error Metrics:
+### A confusion matrix for Precision and Recall.
+Precision can be defined as the ratio of correctly classified data points over total classified data points by the classifier i.e. True Positive/ (True Positive +False Positive).
 
-6. **Get All Users** (Header required*) (METHOD: GET):
-   ```
-   https://api.socialverseapp.com/users/get_all?page=1&page_size=1000
-   ```
+### Recall 
+Recall can be defined as the ratio of correctly classified data points over the total correct data points present in the dataset i.e. True Positive/ (True Positive +False Negative).
 
-### Authorization
+F1 is the harmonic mean of precision and recall, which tends towards the value which is smaller between the two. 
 
-For autherization pass `Flic-Token` as header in the API request:
+F1=2*(Precision*Recall/Precision + Recall)
 
-Header:
-```json
-"Flic-Token": "flic_6e2d8d25dc29a4ddd382c2383a903cf4a688d1a117f6eb43b35a1e7fadbb84b8"
-```
+### ROC Curves:
+Roc curves shows a trade-off between False positive rate and true positive rate. Below is the image of a perfect classifier, there will be no mistakes. ROC curves are also very helful in comparing different models by comparing their AUC scores. AUC score of a model is the area under its ROC Curve. The greater the area the better a model performs.
 
-### Requirements
-
-1. **Personalization:** The recommendation algorithm should make personalized suggestions based on user history and engagement patterns.
-2. **Cold Start Problem Handling:** Include a mechanism to recommend videos for new users without prior interaction history (hint: you can use user mood here).
-
-## 🛠️ Specific Tasks
-
-### 1. Data Preprocessing
-   - Use the APIs provided to retrieve and preprocess video metadata and user interaction data.
-   - Handle missing values, normalize data, and create derived features as needed for the recommendation model.
-
-### 2. Algorithm Development
-   - Develop a recommendation algorithm using approaches such as:
-     - **Content-based filtering:** Recommending videos similar to those the user has viewed or liked.
-     - **Collaborative filtering:** Leveraging similar user preferences to enhance recommendations.
-     - **Hybrid models:** Combining content-based and collaborative filtering for improved accuracy.
-   - Justify the model selection and describe how it meets the project goals.
-
-### 3. Evaluation Metrics
-   - Implement metrics to measure recommendation quality, such as:
-     - **Mean Absolute Error (MAE):**
-     - **Root Mean Square Error (RMSE):**
-   - Summarize results and insights gained from metric evaluations.
-
-### 4. Documentation
-   - Provide clear, step-by-step documentation of the approach, model architecture, and key decisions made during development.
-   - Craete 3 API endpoint where I am going to give you `username`, `category_id` and `mood`
-   - endpoint should be like (In single API call routes will return 10 posts whcih are recomended for user)
-   - `http://localhost:port_no/feed?username=your_username&category_id=category_id_user_want_to_see&mood=user_current_mood
-   - `http://localhost:port_no/feed?username=your_username&category_id=category_id_user_want_to_see
-   - `http://localhost:port_no/feed?username=your_username
-
-## Submission Guidelines
-### Code Repository Requirements
-1. Submit a complete GitHub repository containing:
-   - Properly structured code
-   - Testable implementation
-   - Clear documentation
-   - README.md file must include setup instructions
-
-### Video Presentation Requirements
-1. Record a 5-minute (maximum) video explaining:
-   - Project setup and running instructions
-   - Code walkthrough
-   - Brief self-introduction
-2. Upload the video directly to Internshalla or Google Drive and share the video link with your submission
-
-**Note:** Submission requirements must be completely met do avoid disqualification.
-
-## Evaluation Criteria
-
-Submissions will be evaluated based on:
-
-1. **Code Quality**
-   - Organization and structure
-   - Readability
-   - Efficiency and performance
-   - Best practices implementation
-
-2. **Functionality**
-   - Successful video search implementation
-   - Proper upload mechanism
-   - Error handling
-   - Feature completeness
-
-3. **Documentation**
-   - Clear setup instructions
-   - Detailed usage guidelines
-   - Code comments and documentation
-   - README.md completeness
-
-4. **Presentation**
-   - Video explanation
-   - Clear communication
-   - Technical understanding
-   - Time management
-
-## Results
-
-- Shortlisted candidates will be notified within 24 hours of project evaluation.
-
-For any questions about the submission process, please reach out to me on [Telegram](https://t.me/+VljbLT8o75QxN2I9).
-
-Good luck with your submission!
